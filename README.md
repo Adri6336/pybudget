@@ -1,6 +1,7 @@
 # Pybudget
 This is a python script that will determine your budget for your current pay period.
 
+![pybudget_](https://repository-images.githubusercontent.com/461317333/15ec2644-80c3-467c-97d5-2a74acd32965)
 
 # Using Pybudget
 
