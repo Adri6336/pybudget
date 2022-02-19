@@ -15,7 +15,7 @@ sys('sudo apt install python3-pip')
 sys('pip3 install termcolor')
 
 # 3. Grab script
-sys('curl https://raw.githubusercontent.com/Adri6336/pybudget/main/pybudget > /dev/null 2>&1')
+sys('wget https://raw.githubusercontent.com/Adri6336/pybudget/main/pybudget > /dev/null 2>&1')
 
 # 4. Make script executable
 sys('chmod +x pybudget')
