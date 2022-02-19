@@ -92,7 +92,7 @@ def getExpenseSum(itemCosts):
     # 2. Add to total for each item in expenses
     for pair in itemCosts:  # For each item
         totalExpense += pair[1]  # [1] is the numerical value
-        info('Reserved $%02d for %s' % (pair[1], pair[0]))
+        info('Reserved $%.02f for %s' % (pair[1], pair[0]))
             
     return getDec(totalExpense)
 
