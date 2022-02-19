@@ -1,0 +1,273 @@
+#!/bin/python3
+# Program to account expenses and determine a budget
+# Syntax: ./acct <value of your paycheck>
+import decimal as d  # Allows me to accurately round up 
+from os import system as sys  # Allows me to interact with OS
+from os import path  # Allows me to determine if file exists
+from termcolor import colored as color  # Allows me to color the output
+from sys import exit as terminate  # Allows me to end with codes
+from sys import argv  # Allows me to collect arguments from the terminal 
+
+
+# ============ FUNCTIONS ============
+def info(content, kind='info'):
+    """
+    This prints info to the terminal in a fancy way
+
+    :param content: This is the string you want to display
+    :param kind: bad, info, question; changes color
+    :return: None
+    """
+
+    if kind == 'info':
+        print(color('[i] ', 'blue') + color(content, 'white'))
+
+    elif kind == 'bad':
+        print(color('[X] ', 'red') + color(content, 'white'))
+
+    elif kind == 'question':
+        print(color('[?] ', 'yellow') + color(content, 'white'))
+
+
+def getDec(rawFloat: float):
+    """
+    This function will convert any passed floats into a decimal to the hundredths place.
+
+    :param rawFloat: This is an unconverted float
+    :return: Float object of hundredths place
+    """
+        
+    dVal = d.Decimal  # Create decimal object
+    cent = dVal('0.01')  # Create placeholder
+    converted = float(dVal(str(rawFloat)).quantize(cent, rounding=d.ROUND_UP))  # Convert to quantized d then to float
+    return converted  # Return final product
+
+
+def getExpenses():
+    """
+    This function will either get expenses from file in the format of "Expense,Cost"
+
+    :return: Tuple of 1-1 lists ([expense], [cost]), where [0] == strings and [1] == floats
+    """
+    
+    # 2. Open file and get expenses
+    with open('expenses.acct', 'r') as file:
+        expenses = file.read().split('\n')
+
+    # 3. Convert to appropriate list
+    itemCosts = []
+
+
+    for expense in expenses:
+        try:
+            itemCost = expense.split(',')
+            
+            if not itemCost[0] == '':
+                itemCosts.append((itemCost[0], float(itemCost[1])))
+        
+        except Exception as e:  # Stop if format is wrong
+            error = str(e)
+            info('Failure: Expenses File Format Wrong', kind='bad')
+            info('Error Cause: %s' % error)  # This should only appear if the exception was triggered
+            info('Ensure that the cost section has no non-numeral characters other than a period.')
+            info('Items: ' + str(items) + '\nCosts: ' + str(costs))
+            terminate(4)
+    
+    return itemCosts
+
+
+def getExpenseSum(itemCosts):
+    """
+    This function calculates the sum of all recurring expenses and returns a decimal
+    
+    :param itemCosts: list of (item, cost) tuple
+    :return: float decimal
+    """
+    
+    # 1. Set Up Display and Total
+    print(color('========= EXPENSES =========', 'red'))
+    
+    totalExpense = 0
+    
+    # 2. Add to total for each item in expenses
+    for pair in itemCosts:  # For each item
+        totalExpense += pair[1]  # [1] is the numerical value
+        info('Reserved $%02d for %s' % (pair[1], pair[0]))
+            
+    return getDec(totalExpense)
+
+
+def getArguments():
+    """
+    This gets the arguments you supplied and determines if they're valid
+    ./acct <paycheck> <setting file | optional >
+
+    :return: float paycheck value
+    """
+    
+    # 1. Try to get first argument 
+    try:
+        paycheck = float(argv[1])
+
+    except:  # This pops up if no argument passed
+        info('Can\'t compute budget without paycheck', kind='bad')
+        info('Syntax: ./acct <paycheck value without dollar sign>')
+        terminate(2)
+
+    # 2. This tries to get a second argument if there
+    #    This functionality has not been implemented yet
+    try:
+        expenses = argv[2]
+        if not path.isfile(expenses):
+            info('Expenses File Invalid')
+            return (paycheck)
+        else:
+            return (paycheck, expenses)  # Inactive functionality
+            
+    except:  # This is an optional argument
+        return (paycheck)
+
+
+def getBudget(paycheck, expenses, save, invest):
+    """
+    This function divides your avaliable cash into several portions,
+    depending on how you wish to allocate it.
+    
+    :param paycheck: This is how much money you have to use
+    :param expenses: This is how much money you must spend
+    :param save: This represents a percentage of your budget to save
+    :param invest: This represents a percentage of your budget to invest
+    :return: None
+    """
+    
+    # 1. Determine if okay to continue onto the computation
+    if (save + invest) > 100:  # If you have a bad percentage combination
+        info('Invalid Allocation of Avaliable Funds', kind='bad')
+        info('You may have it so that the percent you save and invest is ' +
+             'greater than 100%')
+        terminate(5)
+    
+    elif expenses > paycheck:  # If you're spending more than you have
+        print(color('\n========= BUDGET =========', 'red'))
+        info('WARNING: BUDGET DEFICIT', kind='bad')
+        info('Your paycheck was insufficient to meet your expenses.\n'+
+             'As a consequence, you have a net loss this period.')
+        info('Current Deficit -------> $%.02f' % (getDec(paycheck - expenses)))
+        terminate(0)  # This represents a successful run of the script 
+        
+    # 2. Compute budget
+    save = getDec((save / 100) * paycheck)
+    invest = getDec((invest / 100) * paycheck)
+    spend = getDec(paycheck - (save + invest + expenses))
+    
+    # 3. Inform user
+    print(color('\n========= BUDGET =========', 'green'))
+    info('You will pay $%.02f for your expenses' % expenses)
+    info('You will invest $%.02f' % invest)
+    info('You will save $%.02f' % save)
+    info('Avaliable Budget -------> $%.02f' % spend)
+    
+    # 4. END
+    terminate(0)    
+
+def setupConfig():
+    """
+    This determines if you set up the files needed
+    
+    :return: None
+    """
+    
+    # Exit variable
+    quit = False
+    
+    # 1. Determine if expenses file exists
+    if not path.isfile('expenses.acct'):
+        info('Failed to Locate Expenses File', kind='bad')
+        sys('echo "example,0.00" > expenses.acct')  # This creates a file with example
+        info('Made expenses.acct file for you. Please enter expenses in the format "expense,x.xx" ' +
+             'without the quote, where "x.xx" represents a decimal. Create a new line for every expense.')
+        quit = True
+    
+    # 2. Determine if the config file exists
+    if not path.isfile('config.acct'):
+        info('Failed to Locate Config File', kind='bad')
+        
+        # Create config file
+        with open('config.acct', 'w') as file:
+            file.write('Save:0\nInvest:0')
+            info('Created config.acct file for you. The please replace the "0" '+
+                 'with a number representing a percentage. This value will tell '+
+                 'me how to allocate your budget.')
+            quit = True 
+
+    # End?
+    if quit:
+        terminate(3)
+
+def getConfig():
+    """
+    Read from the config file. Terminate if bad format.
+    
+    :return: tuple containing int, int for save, invest
+    """
+    
+    # 1. Open file and determine if settings are in there
+    with open('config.acct', 'r') as file:
+        content = file.read()
+        if not 'Invest' in content and not 'Save' in content: 
+            info('Config file not formatted properly', kind='bad')
+            terminate(6)
+            
+        else:
+            options = content.split('\n')
+      
+    # 2. Find option values
+    gotInvest = False  # Represents if invest value was found
+    gotSave = False  # Both of these need to turn True to pass
+          
+    for option in options:  # For every located option in config
+        if 'Invest' in option:  # If you find the invest option
+            invest = option.split(':')[1]  # Get its numerical value 
+            gotInvest = True  # Flip its switch to True
+            
+        elif 'Save' in option:  # Do the same for save
+            save = option.split(':')[1]
+            gotSave = True
+            
+        if gotInvest and gotSave:  # If both switches were flipped
+            try:
+                return (int(save), int(invest))  # Return the information
+                
+            except Exception as e:  # Otherwise tell me what's up
+                info('Unknown Error: %s' + str(e), kind='bad')
+                terminate(9)
+        
+    terminate(7)  # End program: config file not formatted properly
+        
+
+
+# ============ START ============
+
+# 0. Determine if properly configured
+setupConfig()
+
+# 1. Get paycheck
+args = getArguments()
+if 'tuple' in str(type(args)):  # If a path was given
+    paycheck = args[0]  # Only grab the paycheck value
+else:
+    paycheck = args
+
+# 2. Convert paycheck to decimal
+paycheck = getDec(paycheck)
+
+# 3. Get expenses and calculate sum
+itemCosts = getExpenses()
+totalExpenses = getExpenseSum(itemCosts)
+
+# 4. Determine how much to allocate
+saveInvest = getConfig()
+
+# 5. Get budget (take money from budget for investments and savings)
+getBudget(paycheck, totalExpenses, saveInvest[0], saveInvest[1])
+
