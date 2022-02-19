@@ -156,8 +156,9 @@ def getBudget(paycheck, expenses, save, invest):
         terminate(0)  # This represents a successful run of the script 
         
     # 2. Compute budget
-    save = getDec((save / 100) * paycheck)
-    invest = getDec((invest / 100) * paycheck)
+    free = paycheck - expenses
+    save = getDec((save / 100) * free)
+    invest = getDec((invest / 100) * free)
     spend = getDec(paycheck - (save + invest + expenses))
     
     # 3. Inform user
