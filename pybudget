@@ -166,7 +166,7 @@ def getBudget(paycheck, expenses, save, invest):
     info('You will pay $%.02f for your expenses' % expenses)
     info('You will invest $%.02f' % invest)
     info('You will save $%.02f' % save)
-    info('Avaliable Budget -------> $%.02f' % spend)
+    info('Available Budget -------> $%.02f' % spend)
     
     # 4. END
     terminate(0)    
