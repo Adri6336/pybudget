@@ -246,29 +246,28 @@ def getConfig():
     terminate(7)  # End program: config file not formatted properly
         
 
+if __name__ == '__main__':
+    # ============ START ============
 
-# ============ START ============
+    # 0. Determine if properly configured
+    setupConfig()
 
-# 0. Determine if properly configured
-setupConfig()
+    # 1. Get paycheck
+    args = getArguments()
+    if 'tuple' in str(type(args)):  # If a path was given
+        paycheck = args[0]  # Only grab the paycheck value
+    else:
+        paycheck = args
 
-# 1. Get paycheck
-args = getArguments()
-if 'tuple' in str(type(args)):  # If a path was given
-    paycheck = args[0]  # Only grab the paycheck value
-else:
-    paycheck = args
+    # 2. Convert paycheck to decimal
+    paycheck = getDec(paycheck)
 
-# 2. Convert paycheck to decimal
-paycheck = getDec(paycheck)
+    # 3. Get expenses and calculate sum
+    itemCosts = getExpenses()
+    totalExpenses = getExpenseSum(itemCosts)
 
-# 3. Get expenses and calculate sum
-itemCosts = getExpenses()
-totalExpenses = getExpenseSum(itemCosts)
+    # 4. Determine how much to allocate
+    saveInvest = getConfig()
 
-# 4. Determine how much to allocate
-saveInvest = getConfig()
-
-# 5. Get budget (take money from budget for investments and savings)
-getBudget(paycheck, totalExpenses, saveInvest[0], saveInvest[1])
-
+    # 5. Get budget (take money from budget for investments and savings)
+    getBudget(paycheck, totalExpenses, saveInvest[0], saveInvest[1])
