@@ -186,7 +186,7 @@ def setupConfig():
         info('Failed to Locate Expenses File', kind='bad')
         sys('echo "example,0.00" > expenses.acct')  # This creates a file with example
         info('Made expenses.acct file for you. Please enter expenses in the format "expense,x.xx" ' +
-             'without the quote,\n where "x.xx" represents a decimal. Create a new line for every expense.')
+             'without the quote,\n where "x.xx" represents a decimal. Create a new line for every expense.\n')
         quit = True
     
     # 2. Determine if the config file exists
