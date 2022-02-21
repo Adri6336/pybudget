@@ -18,7 +18,8 @@ To get pybudget to run on your Windows PC, do the following:
 5. Use the above commands to navigate to the folder that you downloaded the script to.
 6. The the command "pip install rich"
 7. Enter the command "python pybudget \<put your paycheck value without the dollar sign here\>"
-8. Follow the directions on the screen, then re-enter the previous command.
+8. Follow the directions on the screen, then re-enter the previous command. You'll need to open the .acct files with Notepad.
+9. Enjoy a budget according to your specifications!
 
 
 ## Linux Distros (Debian/Ubuntu Based)
