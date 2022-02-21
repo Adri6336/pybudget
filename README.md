@@ -7,11 +7,7 @@ This is a python script that will determine your budget for your current pay per
 
 Pybudget is currently incompatible with Windows and must be ran on a Linux distro. 
 
-First you'll need to install by running the install script as a super user. In a Debian/Ubuntu 
-based distro, you'll do this by opening the terminal where you downloaded the script and entering:
-> sudo python3 install.py
-
-If you don't want to run the script for this, you can install the requirements manually.
+You can install the requirements manually by entering the following commands:
 1. sudo apt install python3-pip
 2. pip3 install termcolor
 
