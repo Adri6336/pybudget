@@ -3,7 +3,6 @@
 # Syntax: ./acct <value of your paycheck>
 import decimal as d  # Allows me to accurately round up 
 
-from os import system as sys  # Allows me to interact with OS
 from os import path  # Allows me to determine if file exists
 
 from sys import exit as terminate  # Allows me to end with codes
