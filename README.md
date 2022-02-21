@@ -9,7 +9,7 @@ Pybudget is compatible with both Windows and Linux systems.
 
 ## Windows
 
-To get pybudget to run on your Widnows PC, do the following:
+To get pybudget to run on your Windows PC, do the following:
 
 1. Install the lastest version of [Python](https://www.python.org/).
 2. Download the pybudget script.
