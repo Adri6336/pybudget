@@ -2,11 +2,15 @@
 # Program to account expenses and determine a budget
 # Syntax: ./acct <value of your paycheck>
 import decimal as d  # Allows me to accurately round up 
+
 from os import system as sys  # Allows me to interact with OS
 from os import path  # Allows me to determine if file exists
-from termcolor import colored as color  # Allows me to color the output
+
 from sys import exit as terminate  # Allows me to end with codes
 from sys import argv  # Allows me to collect arguments from the terminal 
+
+from rich import print  # Allows me to color and format text output
+from rich.console import Console  # Allows me have clean word wrapping
 
 
 # ============ FUNCTIONS ============
@@ -20,13 +24,25 @@ def info(content, kind='info'):
     """
 
     if kind == 'info':
-        print(color('[i] ', 'blue') + color(content, 'white'))
+        print(f'[bold blue]\[i][/bold blue] [white]{content}[/white]')
 
     elif kind == 'bad':
-        print(color('[X] ', 'red') + color(content, 'white'))
+        print(f'[bold red][X][/bold red] [white]{content}[/white]')
 
     elif kind == 'question':
-        print(color('[?] ', 'yellow') + color(content, 'white'))
+        print(f'[bold yellow]\[?][/bold yellow] [white]{content}[/white]')
+
+
+def paragraph(content: str, style='white'):
+    """
+    This prints properly wrapped text to the console.
+    
+    :param content: a string that you want printed
+    :return: None
+    """
+    console = Console(width = 65)
+    console.print(f'{content}', style=style, justify='left')
+    
 
 
 def getDec(rawFloat: float):
@@ -47,7 +63,8 @@ def getExpenses():
     """
     This function will either get expenses from file in the format of "Expense,Cost"
 
-    :return: Tuple of 1-1 lists ([expense], [cost]), where [0] == strings and [1] == floats
+    :return: list of tuples, where every element has (string: item name,
+                                                      float: item cost)
     """
     
     # 2. Open file and get expenses
@@ -68,15 +85,14 @@ def getExpenses():
         except Exception as e:  # Stop if format is wrong
             error = str(e)
             info('Failure: Expenses File Format Wrong', kind='bad')
-            info('Error Cause: %s' % error)  # This should only appear if the exception was triggered
+            info(f'Error Cause: {error}')  # This should only appear if the exception was triggered
             info('Ensure that the cost section has no non-numeral characters other than a period.')
-            info('Items: ' + str(items) + '\nCosts: ' + str(costs))
             terminate(4)
     
     return itemCosts
 
 
-def getExpenseSum(itemCosts):
+def getExpenseSum(itemCosts: list):
     """
     This function calculates the sum of all recurring expenses and returns a decimal
     
@@ -85,7 +101,7 @@ def getExpenseSum(itemCosts):
     """
     
     # 1. Set Up Display and Total
-    print(color('========= EXPENSES =========', 'red'))
+    print('[bold red]========= EXPENSES =========[/bold red]')
     
     totalExpense = 0
     
@@ -119,7 +135,7 @@ def getArguments():
     try:
         expenses = argv[2]
         if not path.isfile(expenses):
-            info('Expenses File Invalid')
+            info('Expenses File Invalid', kind='bad')
             return (paycheck)
         else:
             return (paycheck, expenses)  # Inactive functionality
@@ -128,7 +144,7 @@ def getArguments():
         return (paycheck)
 
 
-def getBudget(paycheck, expenses, save, invest):
+def getBudget(paycheck: float, expenses: float, save: int, invest: int):
     """
     This function divides your avaliable cash into several portions,
     depending on how you wish to allocate it.
@@ -148,11 +164,11 @@ def getBudget(paycheck, expenses, save, invest):
         terminate(5)
     
     elif expenses > paycheck:  # If you're spending more than you have
-        print(color('\n========= BUDGET =========', 'red'))
+        print('\n[bold red]========= BUDGET =========[/bold red]')
         info('WARNING: BUDGET DEFICIT', kind='bad')
         info('Your paycheck was insufficient to meet your expenses.\n'+
              'As a consequence, you have a net loss this period.')
-        info('Current Deficit -------> $%.02f' % (getDec(paycheck - expenses)))
+        info('Current Deficit -------> [bold italic underline red]$%.02f[/bold italic underline red]' % (getDec(paycheck - expenses)))
         terminate(0)  # This represents a successful run of the script 
         
     # 2. Compute budget
@@ -162,11 +178,11 @@ def getBudget(paycheck, expenses, save, invest):
     spend = getDec(paycheck - (save + invest + expenses))
     
     # 3. Inform user
-    print(color('\n========= BUDGET =========', 'green'))
+    print('\n[bold green]========= BUDGET =========[/bold green]')
     info('You will pay $%.02f for your expenses' % expenses)
     info('You will invest $%.02f' % invest)
     info('You will save $%.02f' % save)
-    info('Available Budget -------> $%.02f' % spend)
+    info('Available Budget -------> [bold green]$%.02f[/bold green]' % spend)
     
     # 4. END
     terminate(0)    
@@ -184,9 +200,12 @@ def setupConfig():
     # 1. Determine if expenses file exists
     if not path.isfile('expenses.acct'):
         info('Failed to Locate Expenses File', kind='bad')
-        sys('echo "example,0.00" > expenses.acct')  # This creates a file with example
-        info('Made expenses.acct file for you. Please enter expenses in the format "expense,x.xx" ' +
-             'without the quote,\n where "x.xx" represents a decimal. Create a new line for every expense.\n')
+        
+        with open('expenses.acct', 'w') as file: # This creates a file with example
+            file.write('example,0.00')
+            
+        paragraph('Made expenses.acct file for you. Please enter expenses in the format "expense,x.xx" ' +
+             'without the quote, where "x.xx" represents a decimal. Create a new line for every expense.\n')
         quit = True
     
     # 2. Determine if the config file exists
@@ -196,8 +215,8 @@ def setupConfig():
         # Create config file
         with open('config.acct', 'w') as file:
             file.write('Save:0\nInvest:0')
-            info('Created config.acct file for you. The please replace the "0" '+
-                 'with a number representing a percentage.\n This value will tell '+
+            paragraph('Created config.acct file for you. The please replace the "0" '+
+                 'with a whole number representing a percentage. This value will tell '+
                  'me how to allocate your budget.')
             quit = True 
 
@@ -240,7 +259,7 @@ def getConfig():
                 return (int(save), int(invest))  # Return the information
                 
             except Exception as e:  # Otherwise tell me what's up
-                info('Unknown Error: %s' + str(e), kind='bad')
+                info('Unknown Error:' + str(e), kind='bad')
                 terminate(9)
         
     terminate(7)  # End program: config file not formatted properly
