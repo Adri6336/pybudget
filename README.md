@@ -25,7 +25,7 @@ To get pybudget to run on your Windows PC, do the following:
 ## Linux Distros (Debian/Ubuntu Based)
 You can install the requirements manually by entering the following commands:
 1. sudo apt install python3-pip
-2. pip3 install termcolor
+2. pip3 install rich
 
 After installing the requirements, navigate to the directory where you downloaded the 
 script to in the terminal and enter the following commands:
