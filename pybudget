@@ -5,9 +5,9 @@
 import decimal as d  # Allows me to accurately round up
 from os import path  # Allows me to determine if file exists
 from sys import exit as terminate  # Allows me to end with codes
-from sys import argv  # Allows me to collect arguments from the terminal
 from rich import print  # Allows me to color and format text output
 from rich.console import Console  # Allows me to have clean word wrapping
+import click  # Allows me to have better argument acquisition and cleaner CLI
 
 
 # ============ FUNCTIONS ============
@@ -106,37 +106,6 @@ def getExpenseSum(itemCosts: list):
         info(f'Reserved ${pair[1]:.02f} for {pair[0]}')
 
     return getDec(totalExpense)
-
-
-def getArguments():
-    """
-    This gets the arguments you supplied and determines if they're valid
-    ./acct <paycheck> <setting file | optional >
-
-    :return: float paycheck value
-    """
-
-    # 1. Try to get first argument
-    try:
-        paycheck = float(argv[1])
-
-    except:  # This pops up if no argument passed
-        info('Can\'t compute budget without paycheck', kind='bad')
-        info('Syntax: ./acct <paycheck value without dollar sign>')
-        terminate(2)
-
-    # 2. This tries to get a second argument if it exists
-    #    This functionality has not been implemented yet
-    try:
-        expenses = argv[2]
-        if not path.isfile(expenses):
-            info('Expenses File Invalid', kind='bad')
-            return (paycheck)
-        else:
-            return (paycheck, expenses)  # Inactive functionality
-
-    except:  # This is an optional argument
-        return (paycheck)
 
 
 def getBudget(paycheck: float, expenses: float, save: int, invest: int):
@@ -292,18 +261,25 @@ def getConfig():
     terminate(7)  # End program: config file not formatted properly
 
 
-if __name__ == '__main__':
-    # ============ START ============
+# ============ CLICK & MAIN ============
+"""
+The following is the primary function for pybudget. It is formatted in this way
+to allow it to get information from click. The first two @s are necesary for this.
 
+
+:param @click.option --pay: This represents the amount of money 
+                            you've been paid this period.
+"""
+
+@click.command()
+@click.option('-p', '--pay', 'pay', default=0.00, help='This is how much you\'ve been paid')
+def main(pay):
+    # ============ START ============
     # 0. Determine if properly configured
     setupConfig()
 
     # 1. Get paycheck
-    args = getArguments()
-    if 'tuple' in str(type(args)):  # If a path was given
-        paycheck = args[0]  # Only grab the paycheck value
-    else:
-        paycheck = args
+    paycheck = pay
 
     # 2. Convert paycheck to decimal
     paycheck = getDec(paycheck)
@@ -318,3 +294,6 @@ if __name__ == '__main__':
     # 5. Get budget (take money from budget for investments and savings)
     getBudget(paycheck, totalExpenses, saveInvest[0], saveInvest[1])
 
+
+if __name__ == '__main__':
+    main()
