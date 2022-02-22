@@ -1,6 +1,6 @@
 #!/bin/python3
 # Program to account expenses and determine a budget
-# Syntax: ./acct <value of your paycheck>
+# Syntax: ./pybudget -p <value of your paycheck>
 
 import decimal as d  # Allows me to accurately round up
 from os import path  # Allows me to determine if file exists
